@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Numerics;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -9,6 +10,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace WpfApp1
 {
@@ -20,95 +22,122 @@ namespace WpfApp1
         CController controller;
         CPlayer player;
         DispatcherTimer timer;
-        double gameTime=60;
+        double gameTime = 60;
         bool gameStarted = false;
-
         public MainWindow()
         {
             InitializeComponent();
-            player = new CPlayer(1.0);//перезарядка 1
-            controller = new CController(2.0, 0.0, GameCanvas.Width, GameCanvas.Height);
-            //каждые 2 секунды объекты
-            timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromMilliseconds(100);
-            timer.Tick += Timer_Tick;
-            GameCanvas.MouseDown += GameCanvas_MouseDown;
+            controller = new CController(0.2, 0, new Size(GameCanvas.Width,GameCanvas.Height));
+            //назначение обработчика события добавления объекта в сцену
+            controller.addObject += AddObjectInScene;
+            //при удалении объекта срабатывает обработчик удаления
+            controller.removeObject += RemoveObjectFromScene
         }
-
-        private void StartButton_Click(object sender, RoutedEventArgs e)
+        private void AddObjectInScene(object sender, CControllerEventArgs e)
         {
-            if (!gameStarted)
-            {
-                gameStarted = true;
-                timer.Start();
-                Start.Content = "Restart";
-            }
-            else
-            {
-                GameCanvas.Children.Clear();
-                player = new CPlayer(1.0);
-                controller = new CController(2.0, 0.0, GameCanvas.Width, GameCanvas.Height);
-                gameTime = 60;
-                Update();
-            }
+            GameCanvas.Children.Add(e.sprite);
         }
 
-        private void Timer_Tick(object sender, EventArgs e)
+        // Обработчик события удаления объекта
+        private void RemoveObjectFromScene(object sender, CControllerEventArgs e)
         {
-            //начало игры
-            if (gameStarted)
-            {
-                controller.update(0.1);
-                player.update(0.1);
-
-                gameTime -= 0.1;
-                //конец игры
-                if (gameTime <= 0)
-                {
-                    gameTime = 0;
-                    timer.Stop();
-                    gameStarted = false;
-                    MessageBox.Show($"Игра окончена! Ваш счет: {controller.getPoints()}");
-                }
-
-                DrawObjects();
-                Update();
-            }
+            GameCanvas.Children.Remove(e.sprite);
         }
 
-        private void GameCanvas_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            Point mousePosition = e.GetPosition(GameCanvas);
-            string clickMessage = controller.mouseClick(mousePosition, player);
-
-            if (!string.IsNullOrEmpty(clickMessage))
-            {
-                message.Items.Add($"{clickMessage}");
-
-                // Прокручиваем к последнему сообщению
-                if (message.Items.Count > 0)
-                    message.ScrollIntoView(message.Items[message.Items.Count - 1]);
-            }
-
-            // Обновляем отображение очков
-            ScoreText.Text = $"Очки: {controller.getPoints():F0}";
-        }
-
-        private void DrawObjects()
-        {
-            GameCanvas.Children.Clear();
-
-            foreach (var obj in controller.getObjects())
-            {
-                Ellipse sprite = obj.getSprite();
-                GameCanvas.Children.Add(sprite);
-            }
-        }
-
-        private void Update()
-        {
-            ScoreText.Text = $"Очки: {controller.getPoints():F1}";
-            TimerText.Text = $"Время: {gameTime:F1}";
-        }
     }
 }
+//    {
+//        CController controller;
+//        CPlayer player;
+//        DispatcherTimer timer;
+//        double gameTime = 60;
+//        bool gameStarted = false;
+
+//        public MainWindow()
+//        {
+//            InitializeComponent();
+//            player = new CPlayer(1.0);//перезарядка 1
+//            controller = new CController(2.0, 0.0, GameCanvas.Width, GameCanvas.Height);
+//            каждые 2 секунды объекты
+//            timer = new DispatcherTimer();
+//            timer.Interval = TimeSpan.FromMilliseconds(100);
+//            timer.Tick += Timer_Tick;
+//            GameCanvas.MouseDown += GameCanvas_MouseDown;
+//        }
+
+//        private void StartButton_Click(object sender, RoutedEventArgs e)
+//        {
+//            if (!gameStarted)
+//            {
+//                gameStarted = true;
+//                timer.Start();
+//                Start.Content = "Restart";
+//            }
+//            else
+//            {
+//                GameCanvas.Children.Clear();
+//                player = new CPlayer(1.0);
+//                controller = new CController(2.0, 0.0, GameCanvas.Width, GameCanvas.Height);
+//                gameTime = 60;
+//                Update();
+//            }
+//        }
+
+//        private void Timer_Tick(object sender, EventArgs e)
+//        {
+//            начало игры
+//            if (gameStarted)
+//            {
+//                controller.update(0.1);
+//                player.update(0.1);
+
+//                gameTime -= 0.1;
+//                конец игры
+//                if (gameTime <= 0)
+//                {
+//                    gameTime = 0;
+//                    timer.Stop();
+//                    gameStarted = false;
+//                    MessageBox.Show($"Игра окончена! Ваш счет: {controller.getPoints()}");
+//                }
+
+//                DrawObjects();
+//                Update();
+//            }
+//        }
+
+//        private void GameCanvas_MouseDown(object sender, MouseButtonEventArgs e)
+//        {
+//            Point mousePosition = e.GetPosition(GameCanvas);
+//            string clickMessage = controller.mouseClick(mousePosition, player);
+
+//            if (!string.IsNullOrEmpty(clickMessage))
+//            {
+//                message.Items.Add($"{clickMessage}");
+
+//                Прокручиваем к последнему сообщению
+//                if (message.Items.Count > 0)
+//                    message.ScrollIntoView(message.Items[message.Items.Count - 1]);
+//            }
+
+//            Обновляем отображение очков
+//            ScoreText.Text = $"Очки: {controller.getPoints():F0}";
+//        }
+
+//        private void DrawObjects()
+//        {
+//            GameCanvas.Children.Clear();
+
+//            foreach (var obj in controller.getObjects())
+//            {
+//                Ellipse sprite = obj.getSprite();
+//                GameCanvas.Children.Add(sprite);
+//            }
+//        }
+//        private void Update()
+//        {
+//            ScoreText.Text = $"Очки: {controller.getPoints():F1}";
+//            TimerText.Text = $"Время: {gameTime:F1}";
+//        }
+//    }
+//}

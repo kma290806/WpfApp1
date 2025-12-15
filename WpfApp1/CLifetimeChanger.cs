@@ -8,23 +8,25 @@ using System.Windows.Media;
 
 namespace WpfApp1
 {
-    public class CLifetimeChanger : CCollectable //время жизни
-    {
-        double lifetimeModifier;
-
-        public CLifetimeChanger(Point position, double size, double lifetime, double lifetimeModifier)
-            : base(position, size, lifetime)
-        {
-            this.lifetimeModifier = lifetimeModifier;
-            sprite.Fill = Brushes.Yellow;
-        }
-
-        public override bool onClick(CPlayer player, CController controller, Point mousePosition)
-        {
-            if (!isMouseOnObject(mousePosition))
-                return false;     
-            controller.pointsIncrease(5);
-            return true;
-        }
-    }
 }
+//    public class CLifetimeChanger : CCollectable //время жизни
+//    {
+//        double lifetimeModifier;
+
+//        public CLifetimeChanger(Point position, double size, double lifetime, double lifetimeModifier)
+//            : base(position, size, lifetime)
+//        {
+//            this.lifetimeModifier = lifetimeModifier;
+//            sprite.Fill = Brushes.Yellow;
+//        }
+
+//        public override bool onClick(CPlayer player, CController controller, Point mousePosition)
+//        {
+//            if (!isMouseOnObject(mousePosition))
+//                return false;     
+//            controller.pointsIncrease(5);
+//            return true;
+//        }
+//    }
+//}
+
